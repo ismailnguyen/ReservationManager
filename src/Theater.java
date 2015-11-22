@@ -133,8 +133,8 @@ public class Theater {
 
 	private void updateReservation(int row, int col, boolean isBooking) throws InvalidActionException, IOException {
 		//Si on veut prendre une place qui n'existe pas dans le tabeau
-		if (row >= seats[0].length
-				|| col >= seats.length)
+		if (row >= seats.length
+				|| col >= seats[0].length)
 			// Alors on affiche un message d'erreur
 			throw new InvalidActionException("This place doesn't exist !");
 

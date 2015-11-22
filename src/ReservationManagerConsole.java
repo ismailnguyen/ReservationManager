@@ -24,6 +24,10 @@ public class ReservationManagerConsole {
 			}
 		});
 		
+		theater = new Theater(theaterFile.length > 0 ? 
+				theaterFile[0].getAbsolutePath()
+				: "theater1.csv");
+		
 		File clientFile = new File(_clientsFile);
 		clients = clientFile.exists() ?
 						Serializer.<LinkedList<Client>>loadFromFile(_clientsFile)
@@ -32,10 +36,6 @@ public class ReservationManagerConsole {
 		int i = 0;
 		for(Client c : clients)
 			c.setCurrentId(i++);
-		
-		theater = new Theater(theaterFile.length > 0 ? 
-								theaterFile[0].getAbsolutePath()
-								: "theater1.csv");
 		
 		loop:while(true){     
 		     System.out.println("What do you want to do (h for help)");	    
@@ -61,6 +61,10 @@ public class ReservationManagerConsole {
 		    	 case "CR":
 		    		 cancelReservation();
 		    		 break;
+		    		 
+		    	 case "SR":
+		    		 showReservation();
+		    		 break;
 
 		    	 case "LC":
 		    		 listClients();
@@ -73,7 +77,6 @@ public class ReservationManagerConsole {
 		    	 case "RC":
 		    		 removeClient();
 		    		 break;
-	
 		     }
 	     }
 	}
@@ -84,6 +87,7 @@ public class ReservationManagerConsole {
 		System.out.println("st: Show Theater");
 		System.out.println("mr: Make a Reservation");
 		System.out.println("cr: Cancel a Reservation");
+		System.out.println("sr: Show Reservation");
 		
 		System.out.println("lc: List of clients");
 		System.out.println("ac: Add  new client");
@@ -94,6 +98,22 @@ public class ReservationManagerConsole {
 
 	private void showTheater() {
 		System.out.println(theater); 
+	}
+	
+	private void showReservation() throws InvalidActionException {
+		System.out.println("Client list : ");
+		if(!listDetailledClients())
+			System.exit(0);
+		
+		System.out.println("Please enter the id of the wanted client or -1 to cancel :");
+		
+		Client selectedClient = selectClient();
+		
+		if(selectedClient != null)
+		{
+			System.out.println(selectedClient.toString() + " has reserved seats number :");
+			selectedClient.getExplictedCost();			
+		}
 	}
 	
 	//Methode pour faire une reservation
@@ -219,7 +239,7 @@ public class ReservationManagerConsole {
 	
 	public void removeClient() throws InvalidActionException, IOException {
 		if(!listDetailledClients())
-			System.exit(0);;
+			System.exit(0);
 		
 		System.out.println("Please enter the id of the client to be removed or -1 to cancel the action.");
 	
@@ -227,9 +247,7 @@ public class ReservationManagerConsole {
 		
 		if(selectedClient != null)
 		{
-			for(Client c : clients)
-				if(c == selectedClient)
-					clients.remove((Client) c);
+			clients.remove((Client) selectedClient);
 		
 			System.out.println(selectedClient.toString() + " was removed with success.");
 			
