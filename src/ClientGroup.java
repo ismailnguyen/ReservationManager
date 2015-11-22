@@ -6,7 +6,7 @@ public class ClientGroup extends Client {
 	
 	@Override
 	public String toString() {
-		return super.toString() + "\"Group\"";
+		return super.toString() + " \"Group\"";
 	}
 
 	@Override

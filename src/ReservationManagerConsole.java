@@ -165,7 +165,10 @@ public class ReservationManagerConsole {
 		System.out.print("Client list : [");
 		
 		for(Client c : clients)
-			System.out.println(c.toString());
+			if(c != clients.getLast())
+				System.out.print(c.toString() + ", ");
+			else
+				System.out.print(c.toString());
 		
 		System.out.println("]");
 	}
@@ -213,14 +216,17 @@ public class ReservationManagerConsole {
 				clients.add(new Client(lastname,
 						firstname,
 						address));
+				break;
 			case 2 :
 				clients.add(new ClientVIP(lastname,
 						firstname,
 						address));
+				break;
 			case 3 :
 				clients.add(new ClientGroup(lastname,
 						firstname,
 						address));
+				break;
 		}
 				
 		clients.getLast().setCurrentId(nextId);
