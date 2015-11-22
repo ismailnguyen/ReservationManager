@@ -62,6 +62,7 @@ public class Client implements Serializable {
 		return seats;
 	}
 	
+	
 	public double getReservationCost() {
 		double result = 0;
 		
@@ -75,7 +76,9 @@ public class Client implements Serializable {
 		StringBuffer buffer = new StringBuffer();
 		
 		for(Seat s : seats)
-			buffer.append(s.toString() + " ("+ s.getType().getPrice() +"e)\n");
+			buffer.append(s.toString() + " ("
+							+ s.getType().getPrice()
+							+ "e)\n");
 		
 		buffer.append("Total : " + this.getReservationCost() + "e\n");
 		
