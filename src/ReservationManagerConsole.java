@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Scanner;
 
 public class ReservationManagerConsole {
@@ -21,6 +22,8 @@ public class ReservationManagerConsole {
 			}
 		});
 		
+		clients = new LinkedList<Client>();
+		
 		theater = new Theater(file.length > 0 ? 
 								file[0].getAbsolutePath()
 								: "theater1.csv");
@@ -28,31 +31,38 @@ public class ReservationManagerConsole {
 		loop:while(true){     
 		     System.out.println("What do you want to do (h for help)");	    
 	
-		     switch(scan.nextLine()) {
-			     case "h":
+		     switch((scan.nextLine()).toUpperCase()) {
 			     case "H":
 				     showHelp();
 				     break;
-	
-			     case "q":
+
 		    	 case "Q":
 		    		 System.out.println("Bye Bye");
 				     System.exit(0);
 				     break loop;
 
-		    	 case "st":
 		    	 case "ST":
 		    		 showTheater();
 		    		 break;
-				     
-		    	 case "mr":
+
 		    	 case "MR":
 		    		 makeReservation();
 		    		 break;
 
-		    	 case "cr":
 		    	 case "CR":
 		    		 cancelReservation();
+		    		 break;
+
+		    	 case "LC":
+		    		 listClients();
+		    		 break;
+
+		    	 case "AC":
+		    		 addClient();
+		    		 break;
+
+		    	 case "RC":
+		    		 removeClient();
 		    		 break;
 	
 			     default:
@@ -63,9 +73,15 @@ public class ReservationManagerConsole {
 	
 	private void showHelp() {
 		System.out.println("h: Print this help");
+		
 		System.out.println("st: Show Theater");
 		System.out.println("mr: Make a Reservation");
 		System.out.println("cr: Cancel a Reservation");
+		
+		System.out.println("lc: List of clients");
+		System.out.println("ac: Add  new client");
+		System.out.println("rc: Remove a client");
+		
 		System.out.println("q: Quit");
 	}
 
@@ -118,16 +134,64 @@ public class ReservationManagerConsole {
 		showTheater();
 	}
 	
-	public void addClient() {
+	private void listClients() {
+		System.out.println("Client list : [");
 		
+		for(Client c : clients)
+			System.out.println(c.getFullString());
+		
+		System.out.println("]");
+	}
+	
+	public void addClient() {
+		String firstname = new String();
+		String lastname = new String();
+		String address = new String();
+		
+		System.out.print("Lastname : ");
+		lastname = scan.next();
+		
+		System.out.print("Firstname : ");
+		firstname = scan.next();
+		
+		System.out.print("Address : ");
+		address = scan.next();
+		
+		clients.add(new Client(lastname,
+								firstname,
+								address));
 	}
 	
 	public Client selectClient() {
 		return null;
 	}
 	
-	public void removeClient() {
+	public void removeClient() throws InvalidActionException {
+		listClients();
 		
+		System.out.println("Please enter the id of the client to be removed or -1 to cancel the action.");
+	
+		int id;
+		Client selectedClient = null;
+		
+		try {
+			id = scan.nextInt();
+			
+			for(Client c : clients)
+			{
+				if(c.getId() == id) {
+					selectedClient = c;
+					break;
+				}
+			}
+			
+			if(selectedClient == null && id != -1)
+				throw new InvalidActionException("Invalid selection");
+		}
+		catch(RuntimeException e) {
+			scan.nextLine();
+			throw new InvalidActionException("This is not a valid number !");
+		}
 	}
 	
 	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException {
@@ -137,7 +201,7 @@ public class ReservationManagerConsole {
 		catch (NumberFormatException 
 				| InvalidActionException 
 				| FileNotFoundException e) {
-			System.out.println(e.getMessage());
+			System.err.println(e.getMessage());
 			new ReservationManagerConsole();
 		}
 	}
