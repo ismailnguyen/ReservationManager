@@ -1,15 +1,29 @@
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 public class ReservationManagerConsole {
 	
 	private Scanner scan = new Scanner(System.in);
 	private Theater theater;
+	private LinkedList<Client> clients;
 
-	public ReservationManagerConsole() throws NumberFormatException, InvalidActionException, FileNotFoundException {
+	public ReservationManagerConsole() throws NumberFormatException, InvalidActionException, IOException {
 		System.out.println("Welcome to the Reservation Manager");
 		
-		theater = new Theater("theater1.csv");
+		File dir = new File("./");
+		File[] file = dir.listFiles(new FilenameFilter() {
+			public boolean accept (File dir, String filename) {
+				return filename.endsWith(".bak");
+			}
+		});
+		
+		theater = new Theater(file.length > 0 ? 
+								file[0].getAbsolutePath()
+								: "theater1.csv");
 		
 		loop:while(true){     
 		     System.out.println("What do you want to do (h for help)");	    
@@ -60,16 +74,16 @@ public class ReservationManagerConsole {
 	}
 	
 	//Methode pour faire une reservation
-	private void makeReservation() throws NumberFormatException, InvalidActionException {
+	private void makeReservation() throws NumberFormatException, InvalidActionException, IOException {
 		updateReservation(true);
 	}
 
 	//Methode pour annuler une reservation
-	private void cancelReservation() throws NumberFormatException, InvalidActionException {
+	private void cancelReservation() throws NumberFormatException, InvalidActionException, IOException {
 		updateReservation(false);
 	}
 	
-	private void updateReservation(boolean isBooking) throws NumberFormatException, InvalidActionException {
+	private void updateReservation(boolean isBooking) throws NumberFormatException, InvalidActionException, IOException {
 		//Chaine qui recupere la ligne que choisi l'user
 		String row = new String();
 		
@@ -104,12 +118,25 @@ public class ReservationManagerConsole {
 		showTheater();
 	}
 	
-	public static void main(String[] args) throws NumberFormatException, InvalidActionException, FileNotFoundException {
+	public void addClient() {
+		
+	}
+	
+	public Client selectClient() {
+		return null;
+	}
+	
+	public void removeClient() {
+		
+	}
+	
+	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException {
 		try {
 			new ReservationManagerConsole();
 		} 
 		catch (NumberFormatException 
-				| InvalidActionException e) {
+				| InvalidActionException 
+				| FileNotFoundException e) {
 			System.out.println(e.getMessage());
 			new ReservationManagerConsole();
 		}

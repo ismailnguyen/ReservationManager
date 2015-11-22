@@ -122,16 +122,16 @@ public class Theater {
 	}
 	
 	//Fait une reservation
-	public void makeReservation(int row, int col) throws InvalidActionException {
+	public void makeReservation(int row, int col) throws InvalidActionException, IOException {
 		updateReservation(row, col, true);
 	}
 
 	//Pour annuler une reservation (comme pour reserver mais avec false au lieu de true dans setBooked())
-	public void cancelReservation(int row, int col) throws InvalidActionException {
+	public void cancelReservation(int row, int col) throws InvalidActionException, IOException {
 		updateReservation(row, col, false);
 	}
 
-	private void updateReservation(int row, int col, boolean isBooking) throws InvalidActionException {
+	private void updateReservation(int row, int col, boolean isBooking) throws InvalidActionException, IOException {
 		//Si on veut prendre une place qui n'existe pas dans le tabeau
 		if (row >= seats[0].length
 				|| col >= seats.length)
@@ -154,22 +154,24 @@ public class Theater {
 		//Sinon (la place est libre)
 		//on reserve la place
 		seats[row][col].setBooked(isBooking);
+		
+		save();
 	}
 	
 	//Methode pour sauver l'etat de la salle de theatre dans un nouveau fichier//ex8
 	public void save() throws IOException {
-		FileWriter fw = new FileWriter("C:/Users/kamal/workspace/TD3/src/theater.CSV.bak");
+		FileWriter fw = new FileWriter(filename != null ?
+											filename+".bak"
+											: "theater.bak");
 		try {
 			fw.write(seats.length + ";" + seats[0].length + ";;;\n");
+			
 			for (int i = 0; i < seats.length; i++) {
-				for (int j = 0; j < seats[0].length; j++) {
-					if (seats[i][j].isBooked() == false) {
-						fw.write(seats[i][j].getType().getSymbole() + ";");
-					}
-					else {
-						fw.write(seats[i][j].getType().getSymbole().toUpperCase() + ";");
-					}
-				}
+				for (int j = 0; j < seats[0].length; j++)
+					fw.write(seats[i][j].isBooked() ?
+								seats[i][j].getType().getSymbole().toUpperCase() + ";"
+								: seats[i][j].getType().getSymbole() + ";");
+				
 				fw.write("\n");
 			}
 		}
