@@ -169,7 +169,8 @@ public class ReservationManagerConsole {
 		System.out.print("Address : ");
 		address = scan.next();
 		
-		clients.add(new Client(lastname,
+		clients.add(new Client(clients.size() > 0 ? clients.getLast().getId() + 1 : 0,
+								lastname,
 								firstname,
 								address));
 		
@@ -210,11 +211,13 @@ public class ReservationManagerConsole {
 		Client selectedClient = selectClient();
 		
 		if(selectedClient != null)
+		{
 			for(Client c : clients)
 				if(c == selectedClient)
 					clients.remove((Client) c);
 		
-		System.out.println(selectedClient.toString() + " was removed with success.");
+			System.out.println(selectedClient.toString() + " was removed with success.");
+		}
 	}
 	
 	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException {
@@ -225,7 +228,6 @@ public class ReservationManagerConsole {
 				| InvalidActionException 
 				| FileNotFoundException e) {
 			System.err.println(e.getMessage());
-			new ReservationManagerConsole();
 		}
 	}
 }

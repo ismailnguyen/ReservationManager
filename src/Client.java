@@ -1,10 +1,13 @@
+import java.util.UUID;
+
 public class Client {
 	private int currentID;
 	private String lastname;
 	private String firstname;
 	private String address;
 	
-	public Client(String lastname, String firstname, String address) {
+	public Client(int id, String lastname, String firstname, String address) {
+		this.currentID = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.address = address;
