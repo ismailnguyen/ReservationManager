@@ -1,16 +1,21 @@
+import java.io.Serializable;
 import java.util.UUID;
 
-public class Client {
+public class Client implements Serializable {
 	private int currentID;
 	private String lastname;
 	private String firstname;
 	private String address;
 	
-	public Client(int id, String lastname, String firstname, String address) {
-		this.currentID = id;
+	public Client(String lastname, String firstname, String address) {
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.address = address;
+	}
+	
+	public void setCurrentId(int id)
+	{
+		this.currentID = id;
 	}
 	
 	public int getId() {

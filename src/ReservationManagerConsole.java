@@ -11,21 +11,30 @@ public class ReservationManagerConsole {
 	private Scanner scan = new Scanner(System.in);
 	private Theater theater;
 	private LinkedList<Client> clients;
+	
+	private String _clientsFile = "clients";
 
-	public ReservationManagerConsole() throws NumberFormatException, InvalidActionException, IOException {
+	public ReservationManagerConsole() throws NumberFormatException, InvalidActionException, IOException, ClassNotFoundException {
 		System.out.println("Welcome to the Reservation Manager");
 		
 		File dir = new File("./");
-		File[] file = dir.listFiles(new FilenameFilter() {
+		File[] theaterFile = dir.listFiles(new FilenameFilter() {
 			public boolean accept (File dir, String filename) {
 				return filename.endsWith(".bak");
 			}
 		});
 		
-		clients = new LinkedList<Client>();
+		File clientFile = new File(_clientsFile);
+		clients = clientFile.exists() ?
+						Serializer.<LinkedList<Client>>loadFromFile(_clientsFile)
+						: new LinkedList<Client>();
+						
+		int i = 0;
+		for(Client c : clients)
+			c.setCurrentId(i++);
 		
-		theater = new Theater(file.length > 0 ? 
-								file[0].getAbsolutePath()
+		theater = new Theater(theaterFile.length > 0 ? 
+								theaterFile[0].getAbsolutePath()
 								: "theater1.csv");
 		
 		loop:while(true){     
@@ -155,7 +164,7 @@ public class ReservationManagerConsole {
 		return false;
 	}
 	
-	public void addClient() {
+	public void addClient() throws IOException {
 		String firstname = new String();
 		String lastname = new String();
 		String address = new String();
@@ -169,12 +178,18 @@ public class ReservationManagerConsole {
 		System.out.print("Address : ");
 		address = scan.next();
 		
-		clients.add(new Client(clients.size() > 0 ? clients.getLast().getId() + 1 : 0,
-								lastname,
+		int nextId = clients.size() > 0 ?
+						clients.getLast().getId() + 1
+						: 0;
+						
+		clients.add(new Client(lastname,
 								firstname,
 								address));
+		clients.getLast().setCurrentId(nextId);
 		
 		System.out.println(clients.getLast().toString() + " was added with success.");
+
+		Serializer.saveToFile(_clientsFile, clients);
 	}
 	
 	public Client selectClient() throws InvalidActionException {
@@ -202,7 +217,7 @@ public class ReservationManagerConsole {
 		}
 	}
 	
-	public void removeClient() throws InvalidActionException {
+	public void removeClient() throws InvalidActionException, IOException {
 		if(!listDetailledClients())
 			System.exit(0);;
 		
@@ -217,10 +232,12 @@ public class ReservationManagerConsole {
 					clients.remove((Client) c);
 		
 			System.out.println(selectedClient.toString() + " was removed with success.");
+			
+			Serializer.saveToFile(_clientsFile, clients);
 		}
 	}
 	
-	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException {
+	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException, ClassNotFoundException {
 		try {
 			new ReservationManagerConsole();
 		} 
