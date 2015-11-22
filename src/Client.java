@@ -31,8 +31,10 @@ public class Client {
 	}
 	
 	public String getFullString() {
-		return this.currentID
-				+ " " + this.toString()
-				+ " " + this.address;
+		return "Client n°" 
+				+ this.currentID
+				+ " : " + this.firstname
+				+ " " + this.lastname
+				+ " (" + this.address + ")";
 	}
 }

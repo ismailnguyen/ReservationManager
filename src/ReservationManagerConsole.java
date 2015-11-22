@@ -65,8 +65,6 @@ public class ReservationManagerConsole {
 		    		 removeClient();
 		    		 break;
 	
-			     default:
-				     System.out.println("You didn't choose correct option ...");
 		     }
 	     }
 	}
@@ -135,12 +133,26 @@ public class ReservationManagerConsole {
 	}
 	
 	private void listClients() {
-		System.out.println("Client list : [");
+		System.out.print("Client list : [");
 		
 		for(Client c : clients)
-			System.out.println(c.getFullString());
+			System.out.println(c.toString());
 		
 		System.out.println("]");
+	}
+	
+	private boolean listDetailledClients() {
+		if(clients.size() > 0)
+		{
+			for(Client c : clients)
+				System.out.println(c.getFullString());
+			
+			return true;
+		}
+		else
+			System.out.println("No clients");
+		
+		return false;
 	}
 	
 	public void addClient() {
@@ -160,38 +172,49 @@ public class ReservationManagerConsole {
 		clients.add(new Client(lastname,
 								firstname,
 								address));
-	}
-	
-	public Client selectClient() {
-		return null;
-	}
-	
-	public void removeClient() throws InvalidActionException {
-		listClients();
 		
-		System.out.println("Please enter the id of the client to be removed or -1 to cancel the action.");
+		System.out.println(clients.getLast().toString() + " was added with success.");
+	}
 	
-		int id;
+	public Client selectClient() throws InvalidActionException {
 		Client selectedClient = null;
 		
 		try {
-			id = scan.nextInt();
+			int id = scan.nextInt();
 			
 			for(Client c : clients)
-			{
 				if(c.getId() == id) {
 					selectedClient = c;
 					break;
 				}
-			}
 			
 			if(selectedClient == null && id != -1)
 				throw new InvalidActionException("Invalid selection");
+			
+			return id != -1 ?
+						selectedClient
+						: null;
 		}
 		catch(RuntimeException e) {
 			scan.nextLine();
 			throw new InvalidActionException("This is not a valid number !");
 		}
+	}
+	
+	public void removeClient() throws InvalidActionException {
+		if(!listDetailledClients())
+			System.exit(0);;
+		
+		System.out.println("Please enter the id of the client to be removed or -1 to cancel the action.");
+	
+		Client selectedClient = selectClient();
+		
+		if(selectedClient != null)
+			for(Client c : clients)
+				if(c == selectedClient)
+					clients.remove((Client) c);
+		
+		System.out.println(selectedClient.toString() + " was removed with success.");
 	}
 	
 	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException {
