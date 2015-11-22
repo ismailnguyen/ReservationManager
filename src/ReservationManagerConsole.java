@@ -202,12 +202,28 @@ public class ReservationManagerConsole {
 						clients.getLast().getId() + 1
 						: 0;
 						
-		clients.add(new Client(lastname,
-								firstname,
-								address));
-		clients.getLast().setCurrentId(nextId);
+		System.out.println("Choose client type :");
+		System.out.println("1 - Client");
+		System.out.println("2 - VIP");
+		System.out.println("3 - Group");
 		
-		System.out.println(clients.getLast().toString() + " was added with success.");
+		switch(scan.nextInt())
+		{
+			case 1 :
+				clients.add(new Client(lastname,
+						firstname,
+						address));
+			case 2 :
+				clients.add(new ClientVIP(lastname,
+						firstname,
+						address));
+			case 3 :
+				clients.add(new ClientGroup(lastname,
+						firstname,
+						address));
+		}
+				
+		clients.getLast().setCurrentId(nextId);
 
 		Serializer.saveToFile(_clientsFile, clients);
 	}
