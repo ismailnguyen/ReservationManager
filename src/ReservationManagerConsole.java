@@ -11,8 +11,6 @@ public class ReservationManagerConsole {
 	private Scanner scan = new Scanner(System.in);
 	private Theater theater;
 	private LinkedList<Client> clients;
-	
-	private String _clientsFile = "clients";
 
 	public ReservationManagerConsole() throws NumberFormatException, InvalidActionException, IOException, ClassNotFoundException {
 		System.out.println("Welcome to the Reservation Manager");
@@ -26,11 +24,11 @@ public class ReservationManagerConsole {
 		
 		theater = new Theater(theaterFile.length > 0 ? 
 				theaterFile[0].getAbsolutePath()
-				: "theater1.csv");
+				: Const.THEATER_FILE);
 		
-		File clientFile = new File(_clientsFile);
+		File clientFile = new File(Const.CLIENTS_FILE);
 		clients = clientFile.exists() ?
-						Serializer.<LinkedList<Client>>loadFromFile(_clientsFile)
+						Serializer.<LinkedList<Client>>loadFromFile(Const.CLIENTS_FILE)
 						: new LinkedList<Client>();
 						
 		int i = 0;
@@ -181,7 +179,7 @@ public class ReservationManagerConsole {
 
 			//ex : on veut la place A2 : 'A' = 65 en ASCII et '2' = 50 donc 'A'-65 = 0 et '2'-48 = 2
 		
-			Serializer.saveToFile(_clientsFile, clients);
+			Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 			
 			//On affiche la nouvelle salle
 			showTheater();
@@ -258,7 +256,7 @@ public class ReservationManagerConsole {
 				
 		clients.getLast().setCurrentId(nextId);
 
-		Serializer.saveToFile(_clientsFile, clients);
+		Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 	}
 	
 	public Client selectClient() throws InvalidActionException {
@@ -300,16 +298,17 @@ public class ReservationManagerConsole {
 		
 			System.out.println(selectedClient.toString() + " was removed with success.");
 			
-			Serializer.saveToFile(_clientsFile, clients);
+			Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 		}
 	}
 	
 	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException, ClassNotFoundException {
 		try {
-			new ReservationManagerConsole();
+			//new ReservationManagerConsole();
+			new ReservationManagerGUI();
 		} 
 		catch (NumberFormatException 
-				| InvalidActionException 
+				//| InvalidActionException 
 				| FileNotFoundException e) {
 			System.err.println(e.getMessage());
 		}

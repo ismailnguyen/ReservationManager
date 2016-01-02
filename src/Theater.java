@@ -6,8 +6,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.geom.Rectangle2D;
+import javax.swing.ImageIcon;
+import javax.swing.JPanel;
 
-public class Theater {
+@SuppressWarnings("serial")
+public class Theater extends JPanel {
+	
+	//GUI
+	private int rectSize = 40;
+	private int currentRow = -1;
+	private int currentCol = -1;
 	
 	//Room settings
 	private StringBuffer brand;
@@ -88,6 +101,14 @@ public class Theater {
 	
 	public Seat getSeat(int row, int col) {
 		return seats[col][row];
+	}
+	
+	public SeatType getType(int row, int col){
+		return seats[row][col].getType();
+	}
+
+	public boolean isBooked(int row, int col){
+		return seats[row][col].isBooked();
 	}
 	
 	//Renvoie le nombre de places libres restantes
@@ -214,5 +235,106 @@ public class Theater {
 			System.exit(-1);
 		}
 		fw.close();
+	}
+	
+	@Override
+	public int getWidth() { // Width of the component
+		return 640/*((nbCol+1) * 40) -23 //pour avoir exatement la taille de la fenetre au dimension du theatre*/;
+	}
+
+	@Override
+	public int getHeight() { // Height of the component
+		return 480/*(nbRow+1) * 40 //pour avoir exatement la taille de la fenetre au dimension du theatre*/;
+	}
+
+	@Override
+	public Dimension getPreferredSize() { // Preferred size of the component
+		return new Dimension(getWidth(), getHeight());
+	}
+
+	@Override
+	public void paint(Graphics g) { // How the component is drawn
+		ImageIcon seatImg = new ImageIcon("img/free_seat.png");
+		ImageIcon reservedImg = new ImageIcon("img/reserved_seat.png");
+		super.paint(g); // Firsly, draw the super-class (the original JPanel)
+		// Custom drawing by method calls to the Graphics instance (see java.awt.Graphics)
+		g.setColor(new Color(221, 221, 221)); // Set the color to Black
+		g.fillRect(0, 0, getWidth(), getHeight()); // Fill a rectangle where top-left corner is at (0,0) and of the same size than the component
+		
+		for (int i = 0; i < seats.length; i++) {//Double boucle pour creer une image du theatre
+			for (int j = 0; j < seats[0].length; j++) {
+				//En fonction du type de la place on met une couleur differente
+				switch (seats[i][j].getType()) {
+					case OBSTACLE:
+						g.setColor(Color.GRAY);
+					break;
+					case SCENE:
+						g.setColor(Color.YELLOW);
+					break;
+					default:
+						//Vert si place libre rouge sinon
+						if (seats[i][j].isBooked() == false) {
+							g.setColor(Color.GREEN);
+						}
+						else {
+							g.setColor(Color.RED);
+						}
+					break;
+				}
+				//On creer des carre pour representer les places
+				g.fillRect(/*150 +*/ (j * rectSize), /*4 + */(i * rectSize), rectSize, rectSize);
+				//On met un siege dans les places et pas dans obstacle ou secene
+				if ((seats[i][j].getType() != SeatType.OBSTACLE) && (seats[i][j].getType() != SeatType.SCENE)) {
+					if (seats[i][j].isBooked() == false) {
+						seatImg.paintIcon(this, g, /*150 + */(j * rectSize),/* 4 + */(i * rectSize));
+					}
+					else if (seats[i][j].isBooked() == true) {
+						reservedImg.paintIcon(this, g,/* 150 + */(j * rectSize), /*4 + */(i * rectSize));
+					}
+					g.setColor(Color.BLACK);//Couleur noir pour les lettres
+					/* Loading a new font (14pt, bold) */
+					g.setFont(new Font("default", Font.BOLD, 14));
+					/* Getting the category String */
+					String category = seats[i][j].getType().toString().toUpperCase();
+					/* Calculating the String dimension in pixels */
+					Rectangle2D stringDim = g.getFontMetrics().getStringBounds(category, g);
+					/* Drawing the string centered within the rectangle and centered from the string itself */
+					g.drawString(category, /*150 +*/ j * rectSize + rectSize / 2 - (int) stringDim.getWidth() / 2,/* 4 +*/ i * rectSize + rectSize / 2 + (int) stringDim.getHeight() / 2);
+				}
+					
+				//Contour de toutes les places et obsatcles 
+				g.setColor(Color.BLACK);
+				g.drawRect(/*150 + */(j * rectSize),/* 4 +*/ (i * rectSize), rectSize, rectSize);
+				
+			}
+		}
+		/*ImageIcon img = new ImageIcon("emosquare.png");
+		img.paintIcon(this, g,400, 200);*/
+		if((currentCol < seats.length) && (currentRow >= 0 )){
+			if((currentCol < seats[0].length) && (currentRow >= 0)){
+				g.setColor(Color.RED);
+				g.drawRect(currentCol*rectSize, currentRow*rectSize, rectSize, rectSize);
+			}
+		}
+	}
+	
+	public int getRectSize() {
+		return rectSize;
+	}
+	
+	public void setSelectedRow(int row){
+		currentRow = row;
+	}
+	
+	public void setSelectedCol(int col){
+		currentCol = col;
+	}
+	
+	public int getSelectedRow(){
+		return currentRow;
+	}
+	
+	public int getSelectedCol(){
+		return currentCol;
 	}
 }
