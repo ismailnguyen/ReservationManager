@@ -49,7 +49,7 @@ public class Theater {
 		if (!file.exists())
 			// Alors on affiche un message d'erreur
 			throw new FileNotFoundException("This file doesn't exist !");
-		System.out.println("File " + filename + " loaded with success.");
+		//System.out.println("File " + filename + " loaded with success.");
 
 		//On recupere le contenu du fichier dans un Scanner
 		Scanner scan = new Scanner(new FileInputStream(file));

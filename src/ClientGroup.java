@@ -21,6 +21,9 @@ public class ClientGroup extends Client {
 	
 	@Override
 	public String getExplictedCost() {
+		if(seats.size() == 0)
+			return "No reservation made for this client.\n";
+		
 		StringBuffer buffer = new StringBuffer();
 		
 		for(Seat s : seats)

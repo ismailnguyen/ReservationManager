@@ -15,6 +15,7 @@ public class Client implements Serializable {
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.address = address;
+		this.seats = new LinkedList<Seat>();
 	}
 	
 	public void setCurrentId(int id) {
@@ -62,7 +63,6 @@ public class Client implements Serializable {
 		return seats;
 	}
 	
-	
 	public double getReservationCost() {
 		double result = 0;
 		
@@ -73,6 +73,9 @@ public class Client implements Serializable {
 	}
 	
 	public String getExplictedCost() {
+		if(seats.size() == 0)
+			return "No reservation made for this client.\n";
+		
 		StringBuffer buffer = new StringBuffer();
 		
 		for(Seat s : seats)
