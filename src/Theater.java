@@ -87,15 +87,15 @@ public class Theater {
 	}
 	
 	public Seat getSeat(int row, int col) {
-		return seats[row][col];
+		return seats[col][row];
 	}
 	
 	//Renvoie le nombre de places libres restantes
 	public int getNbFreeSeats() {
 		int res = 0;
 		
-		for(int i=0; i<seats[0].length; i++)
-			for(int j=0; j<seats.length; j++)
+		for(int i=0; i<seats.length; i++)
+			for(int j=0; j<seats[0].length; j++)
 				if(!seats[i][j].isBooked()
 					&& seats[i][j].getType() != SeatType.OBSTACLE
 					&& seats[i][j].getType() != SeatType.SCENE)
@@ -108,8 +108,8 @@ public class Theater {
 		public int getNbBookedSeats() {
 			int res = 0;
 			
-			for(int i=0; i<seats[0].length; i++)
-				for(int j=0; j<seats.length; j++)
+			for(int i=0; i<seats.length; i++)
+				for(int j=0; j<seats[0].length; j++)
 					if(seats[i][j].isBooked()
 						&& seats[i][j].getType() != SeatType.OBSTACLE
 						&& seats[i][j].getType() != SeatType.SCENE)
