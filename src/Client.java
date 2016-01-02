@@ -54,9 +54,14 @@ public class Client implements Serializable {
 		seats.add(s);
 	}
 	
-	public void removeSeat(Seat s) {
-		if (seats.contains((Seat) s))
-			seats.remove((Seat) s);
+	public boolean removeSeat(Seat s) {
+		for(Seat seat : seats) {
+			if(seat.getCol() == s.getCol()
+					&& seat.getRow() == s.getRow())
+				s = seat;
+		}
+		
+		return seats.remove(s);
 	}
 	
 	public List<Seat> getSeats() {

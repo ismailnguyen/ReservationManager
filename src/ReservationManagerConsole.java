@@ -97,7 +97,7 @@ public class ReservationManagerConsole {
 	}
 
 	private void showTheater() {
-		System.out.println(theater); 
+		System.out.println(theater + "\n");
 	}
 	
 	private void showReservation() throws InvalidActionException {
@@ -118,47 +118,74 @@ public class ReservationManagerConsole {
 	
 	//Methode pour faire une reservation
 	private void makeReservation() throws NumberFormatException, InvalidActionException, IOException {
-		updateReservation(true);
+		if(theater.getNbFreeSeats() > 0)
+			updateReservation(true);
+		else
+			System.out.println("House full.");
 	}
 
 	//Methode pour annuler une reservation
 	private void cancelReservation() throws NumberFormatException, InvalidActionException, IOException {
-		updateReservation(false);
+		if(theater.getNbBookedSeats() > 0)
+			updateReservation(false);
+		else
+			System.out.println("No reservation have been made yet.");
 	}
 	
 	private void updateReservation(boolean isBooking) throws NumberFormatException, InvalidActionException, IOException {
-		//Chaine qui recupere la ligne que choisi l'user
-		String row = new String();
+		System.out.println("Client list : ");
+		if(!listDetailledClients())
+			System.exit(0);
 		
-		//Chaine qui recupere la colonne que choisi l'user
-		String col = new String();
+		System.out.println("Please enter the id of the wanted client or -1 to cancel :");
+		
+		Client selectedClient = selectClient();
+		
+		if(selectedClient != null)
+		{
+			//Chaine qui recupere la ligne que choisi l'user
+			String row = new String();
+			
+			//Chaine qui recupere la colonne que choisi l'user
+			String col = new String();
 
-		//On affiche la repartition des sièges
-		showTheater();
+			//On affiche la repartition des sièges
+			showTheater();
 
-		//On demande a l'user qu'il choisisse une ligne (lettre)
-		System.out.println("Please enter a row letter :");
+			//On demande a l'user qu'il choisisse une ligne (lettre)
+			System.out.println("Please enter a row letter :");
 
-		//On recupere la ligne && on le met en majuscule
-		row = (scan.next()).toUpperCase();
+			//On recupere la ligne && on le met en majuscule
+			row = (scan.next()).toUpperCase();
 
-		//On demande a l'user de choisir une  colonne (chiffre)
-		System.out.println("Please enter line number : ");
+			//On demande a l'user de choisir une  colonne (chiffre)
+			System.out.println("Please enter line number : ");
 
-		//On la recupere
-		col = scan.next();
-	
-		if(isBooking)
-			//On reserve la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
-			theater.makeReservation(row.charAt(0) - 65, Integer.parseInt(col));
-		else
-			//On annule la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
-			theater.cancelReservation(row.charAt(0) - 65, Integer.parseInt(col));
+			//On la recupere
+			col = scan.next();
+		
+			if(isBooking)
+			{
+				//On reserve la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
+				if(theater.makeReservation(row.charAt(0) - 65, Integer.parseInt(col)))
+					//Si la résérvation dans la salle est faite, on ajoute la place à la liste des résérvations du client
+					selectedClient.addSeat(theater.getSeat(row.charAt(0) - 65, Integer.parseInt(col)));
+			}
+			else
+			{
+				//Si le client a déja reservé cette place, on lui enlève
+				if(selectedClient.removeSeat(theater.getSeat(row.charAt(0) - 65, Integer.parseInt(col))))
+					//On annule la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
+					theater.cancelReservation(row.charAt(0) - 65, Integer.parseInt(col));
+			}
 
-		//ex : on veut la place A2 : 'A' = 65 en ASCII et '2' = 50 donc 'A'-65 = 0 et '2'-48 = 2
-	
-		//On affiche la nouvelle salle
-		showTheater();
+			//ex : on veut la place A2 : 'A' = 65 en ASCII et '2' = 50 donc 'A'-65 = 0 et '2'-48 = 2
+		
+			Serializer.saveToFile(_clientsFile, clients);
+			
+			//On affiche la nouvelle salle
+			showTheater();
+		}
 	}
 	
 	private void listClients() {
@@ -263,7 +290,7 @@ public class ReservationManagerConsole {
 		if(!listDetailledClients())
 			System.exit(0);
 		
-		System.out.println("Please enter the id of the client to be removed or -1 to cancel the action.");
+		System.out.println("Please enter the id of the client to be removed or -1 to cancel :");
 	
 		Client selectedClient = selectClient();
 		
