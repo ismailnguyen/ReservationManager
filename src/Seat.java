@@ -6,9 +6,9 @@ public class Seat implements Serializable {
 	private SeatType type;
 	private boolean isBooked;
 
-	public Seat(int row, int line, SeatType type, boolean isBooked) {
+	public Seat(int row, int col, SeatType type, boolean isBooked) {
 		this.row = row;
-		this.col = line;
+		this.col = col;
 		this.type = type;
 		this.isBooked = isBooked;
 	}

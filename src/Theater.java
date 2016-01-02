@@ -35,14 +35,14 @@ public class Theater extends JPanel {
 	private SeatType placeType;
 
 	//Constructor 1
-	public Theater(int nbRow, int nbCol) {
-		seats = new Seat[nbRow][nbCol];
+	public Theater(int rows, int cols) {
+		seats = new Seat[rows][cols];
 		
 		//Fill double dimensional array
-		for (int i = 0; i < nbRow; i++)
-			for (int j = 0; j < nbCol; j++)
+		for (int i = 0; i < rows; i++)
+			for (int j = 0; j < cols; j++)
 				//Fill each seat with first category type and available status
-				seats[i][j] = new Seat(j, i, SeatType.FIRST_CATEGORY, false);
+				seats[i][j] = new Seat(i, j, SeatType.FIRST_CATEGORY, false);
 	}
 
 	//Constructor 2 // Ex 7
@@ -85,8 +85,8 @@ public class Theater extends JPanel {
 			for (int j = 0; j < Integer.parseInt(values.get(1)); j++)
 				//Si on n'a pas depasser la chaine
 				if (a < values.size())
-					seats[i][j] = new Seat(j,
-											i,
+					seats[i][j] = new Seat(i,
+											j,
 											SeatType.getSeatTypeFromSymbole(values.get(a)),
 											SeatType.isBooked(values.get(a++)));
 	}
@@ -100,7 +100,7 @@ public class Theater extends JPanel {
 	}
 	
 	public Seat getSeat(int row, int col) {
-		return seats[col][row];
+		return seats[row][col];
 	}
 	
 	public SeatType getType(int row, int col){
@@ -158,7 +158,6 @@ public class Theater extends JPanel {
 										placeType.getSymbole().toUpperCase()
 										//sinon en minuscule
 										: placeType.getSymbole()));
-				
 			}
 			
 			//retour à la ligne

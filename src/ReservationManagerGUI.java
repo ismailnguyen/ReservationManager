@@ -7,10 +7,13 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Scanner;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -20,9 +23,10 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class ReservationManagerGUI extends WindowAdapter implements MouseListener, ActionListener {
-	Scanner scan;
-	Theater theater = new Theater(Const.THEATER_FILE);//Construit le theatre
-	LinkedList<Client> clients = new LinkedList<Client>();//Liste client
+	
+	private Scanner scan = new Scanner(System.in);
+	private Theater theater;
+	private LinkedList<Client> clients;
 	
 	JFrame frame = new JFrame(Const.APPLICATION_NAME);// Creer une nouvelle fenetre appelee  Reservation Manager GUI
 	JButton newClient = new JButton(Const.NEW_CLIENT);//Creation bouton nouveau client
@@ -30,24 +34,25 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 	JButton showReservation = new JButton(Const.SHOW_RESERVATION);//Creation boutton 
 	JButton makeReservation = new JButton(Const.MAKE_RESERVATION);//Creation boutton 
 	JButton cancelReservation = new JButton(Const.CANCEL_RESERVATION);
-
 	JComboBox<Client> comboClients = new JComboBox<Client>(); // Empty combobox
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public ReservationManagerGUI() throws FileNotFoundException {
-		//On charge la liste de clients
-		try {
-			clients = Serializer.<LinkedList> loadFromFile(Const.CLIENTS_FILE);
-			for (Client c : clients) {
-				c.setCurrentId(c.getId() + 1);
+	public ReservationManagerGUI() throws NumberFormatException, InvalidActionException, IOException, ClassNotFoundException {
+		File dir = new File("./");
+		File[] theaterFile = dir.listFiles(new FilenameFilter() {
+			public boolean accept (File dir, String filename) {
+				return filename.endsWith(".bak");
 			}
-		}
-		catch (ClassNotFoundException e1) {
-			JOptionPane.showMessageDialog(null, e1, "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		catch (IOException e1) {
-			clients = new LinkedList<Client>();
-		}
+		});
+		
+		theater = new Theater(theaterFile.length > 0 ? 
+				theaterFile[0].getAbsolutePath()
+				: Const.THEATER_FILE);
+		
+		File clientFile = new File(Const.CLIENTS_FILE);
+		clients = clientFile.exists() ?
+						Serializer.<LinkedList<Client>>loadFromFile(Const.CLIENTS_FILE)
+						: new LinkedList<Client>();
 
 		frame.setMinimumSize(/*new Dimension(640, 480)*/theater.getPreferredSize());// Dimension minimum de la fenetre : 640 pixels sur 480 pixels
 		
@@ -78,24 +83,25 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 		JPanel buttonPanel = new JPanel();//Panneaux pour mettre les bouton a part
 
 		//On attribu une action a chaque boutton
-		newClient.setActionCommand("newC");
+		newClient.setActionCommand("AC");
 		newClient.addActionListener(this);
 
-		delClient.setActionCommand("delC");
+		delClient.setActionCommand("RC");
 		delClient.addActionListener(this);
 
-		showReservation.setActionCommand("showRes");
+		showReservation.setActionCommand("SR");
 		showReservation.addActionListener(this);
 
-		makeReservation.setActionCommand("makeRes");
+		makeReservation.setActionCommand("MR");
 		makeReservation.addActionListener(this);
 
-		cancelReservation.setActionCommand("cancelRes");
+		cancelReservation.setActionCommand("CR");
 		cancelReservation.addActionListener(this);
 
 		frame.setLayout(new BorderLayout());
 		frame.add(theater, BorderLayout.CENTER); // Add it to the frame
-		refreshCombo();//On rafrait la liste de clients
+		refreshCombo();//On rafraichit la liste de clients
+		
 		//On ajoute tout les bouton et la liste au panneau buttonPanel
 		buttonPanel.add(comboClients);
 		buttonPanel.add(newClient);
@@ -107,6 +113,7 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 		buttonPanel.setLayout(buttonLayout);
 		//On met les bouton en haut
 		frame.add(buttonPanel, BorderLayout.NORTH);
+		
 		//On ecoute les actions lies a la souris
 		theater.addMouseListener(this);
 		frame.setLocationRelativeTo(null);//Affiche la fentre au centre de l'ecran
@@ -153,17 +160,17 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 			//si le parametre est :
 			switch (e.getActionCommand()) {
 				//new Client	
-				case "newC":
+				case "AC":
 					addClient();
 					break;
 				
 				//delete Client
-				case "delC":
-					deleteClient();
+				case "RC":
+					removeClient();
 					break;
 				
 				//Show Reservation
-				case "showRes":
+				case "SR":
 					//Get selected place
 					selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex());
 					if (selectedClient != null)
@@ -174,26 +181,26 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 					break;
 				
 				//make Reservation
-				case "makeRes":
+				case "MR":
 					makeReservation();
 					break;
 				
-					//cancel Reservation
-				case "cancelRes":
+				//cancel Reservation
+				case "CR":
 					cancelReservation();
 					break;
 			}
 			
 			theater.updateUI();
 		}
-		catch(IOException ex) {
-			ex.printStackTrace();
+		catch(IOException 
+				| InvalidActionException ex) {
+			JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
 		}
 	}
 
-	public void addClient() {
+	public void addClient() throws InvalidActionException, IOException {
 		/* DATA FIELD */
-		Client c = null;
 		JComboBox<String> clientTypeChoice = new JComboBox<>();
 		clientTypeChoice.addItem("Client");
 		clientTypeChoice.addItem("VIP");
@@ -201,45 +208,53 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 		JTextField lastnameField = new JTextField(5);
 		JTextField firstnameField = new JTextField(5);
 		JTextField addressField = new JTextField(5);
+		
 		/* BUILDING OF THE FORM */
 		JPanel myPanel = new JPanel(new GridLayout(4, 2));
-		myPanel.add(new JLabel("Type:"));
+		myPanel.add(new JLabel("Type : "));
 		myPanel.add(clientTypeChoice);
-		myPanel.add(new JLabel("Lastname:"));
+		myPanel.add(new JLabel("Lastname : "));
 		myPanel.add(lastnameField);
-		myPanel.add(new JLabel("Firstname:"));
+		myPanel.add(new JLabel("Firstname : "));
 		myPanel.add(firstnameField);
-		myPanel.add(new JLabel("Address:"));
+		myPanel.add(new JLabel("Address : "));
 		myPanel.add(addressField);
+		
 		/* CALLING THE DIALOG */
 		JOptionPane.showConfirmDialog(null, myPanel, "Create new Client", JOptionPane.OK_CANCEL_OPTION);
 		
-		switch (clientTypeChoice.getItemAt(clientTypeChoice.getSelectedIndex())) {
-			case "Client":
-				c = new Client(lastnameField.getText(), firstnameField.getText(), addressField.getText());
-			break;
-			case "VIP":
-				c = new ClientVIP(lastnameField.getText(), firstnameField.getText(), addressField.getText());
-			break;
-			case "Group":
-				c = new ClientGroup(lastnameField.getText(), firstnameField.getText(), addressField.getText());
-			break;
+		int nextId = clients.size() > 0 ?
+				clients.getLast().getId() + 1
+				: 0;
+		
+		switch(clientTypeChoice.getItemAt(clientTypeChoice.getSelectedIndex()))
+		{
+			case "Client" :
+				clients.add(new Client(lastnameField.getText(),
+										firstnameField.getText(),
+										addressField.getText()));
+				break;
+			case "VIP" :
+				clients.add(new ClientVIP(lastnameField.getText(),
+											firstnameField.getText(),
+											addressField.getText()));
+				break;
+			case "Group" :
+				clients.add(new ClientGroup(lastnameField.getText(),
+												firstnameField.getText(),
+												addressField.getText()));
+				break;
 		}
 		
-		clients.add(c);
+		clients.getLast().setCurrentId(nextId);
+
 		theater.updateUI();
 		refreshCombo();
 		
-		try {
-			Serializer.saveToFile(Const.CLIENTS_FILE, clients);//On sauvegarde la liste de client
-		}
-		catch (IOException ex) {
-			JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
-		}
-
+		Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 	}
 
-	public void deleteClient() throws IOException {
+	public void removeClient() throws InvalidActionException, IOException {
 		//On prend le client selecionne dans la liste
 		Client selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex()); // Get the car that is currently selected
 		if (selectedClient != null) {
@@ -248,109 +263,78 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 			switch (val) {
 				case JOptionPane.OK_OPTION: /* Go ! */
 					//On retire le client de la liste
-					clients.remove(selectedClient);
+					clients.remove((Client) selectedClient);
 					theater.updateUI(); // Refresh User Interface
 					refreshCombo();
+					
 					//On retire les sieges que ce client avait
 					for (Seat s : selectedClient.getSeats()) {
-						try {
-							theater.cancelReservation(s.getCol(), s.getRow());
-						}
-						catch (InvalidActionException e1) {
-							JOptionPane.showMessageDialog(null, e1, "Error", JOptionPane.ERROR_MESSAGE);
-						}
+						theater.cancelReservation(s.getCol(), s.getRow());
 					}
 
 				break;
 			}
 
-			//On sauvegarde cette liste
-			try {
-				Serializer.saveToFile(Const.CLIENTS_FILE, clients);
-			}
-			catch (IOException ex) {
-				JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
-			}
+			Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 		}
-		else {
+		else
 			JOptionPane.showMessageDialog(null, "Invalid Client !", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-
 	}
 
-	public void makeReservation() throws IOException {
-		Client selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex()); // Get the car that is currently selected
-		if (selectedClient != null) {
-			try {
-				theater.makeReservation(theater.getSelectedCol(), theater.getSelectedRow());
-				if ((theater.getSelectedCol() < theater.getNbCol()) && (theater.getSelectedRow() < theater.getNbRow())) {
-					Seat s = new Seat(theater.getSelectedRow(), theater.getSelectedCol(), theater.getType(theater.getSelectedRow(), theater.getSelectedCol()), theater.isBooked(theater.getSelectedRow(), theater.getSelectedCol()));//On recupere la place reservee par le client 
-					selectedClient.addSeat(s);//On ajoute cette place a la liste de places reservee par le client
-					try {
-						Serializer.saveToFile(Const.CLIENTS_FILE, clients);//On sauvegarde la liste de client pour prendre en compte la nouvelle place prise
-					}
-					catch (IOException ex) {
-						JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
-					}
-				}
-			}
-			catch (InvalidActionException e1) {
-				JOptionPane.showMessageDialog(null, e1, "Error", JOptionPane.ERROR_MESSAGE);
-			}
-
-			theater.updateUI(); // Refresh User Interface
-		}
-		else {
-			JOptionPane.showMessageDialog(null, "Invalid Client !", "Error", JOptionPane.ERROR_MESSAGE);
-		}
+	//Methode pour faire une reservation
+	private void makeReservation() throws NumberFormatException, InvalidActionException, IOException {
+		if(theater.getNbFreeSeats() > 0)
+			updateReservation(true);
+		else
+			JOptionPane.showMessageDialog(null, "House full !", "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
-	public void cancelReservation() throws IOException {
+	//Methode pour annuler une reservation
+	private void cancelReservation() throws NumberFormatException, InvalidActionException, IOException {
+		if(theater.getNbBookedSeats() > 0)
+			updateReservation(false);
+		else
+			JOptionPane.showMessageDialog(null, "No reservation have been made yet.", "Error", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	private void updateReservation(boolean isBooking) throws NumberFormatException, InvalidActionException, IOException {
 		Client selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex()); // Get the car that is currently selecte
 		if (selectedClient != null) {
-			try {//On recupere les erreurs s'il y en a
-
-				if ((theater.getSelectedCol() < theater.getNbCol()) && (theater.getSelectedRow() < theater.getNbRow())) {
-					Seat s = new Seat(theater.getSelectedRow(), theater.getSelectedCol(), theater.getType(theater.getSelectedRow(), theater.getSelectedCol()), theater.isBooked(theater.getSelectedRow(), theater.getSelectedCol()));//On recupere la place reservee par le client 
-					//On regarde si le client selectionner veut supprimer une place qui lui appartient
-					if (selectedClient.getSeats().toString().contains(s.toString())) {
-						//Si la place lui appartient -> OK
-						theater.cancelReservation(theater.getSelectedCol(), theater.getSelectedRow());
-						selectedClient.removeSeat(s);//On ajoute cette place a la liste de places reservee par le client
-					}
-					else {
-						//Sinon -> Message erreur
-						JOptionPane.showMessageDialog(null, "Invalid Client !", "Error", JOptionPane.ERROR_MESSAGE);
-					}
-
-					//On sauvegarde la liste de client pour prendre en compte la nouvelle place prise
-					try {
-						Serializer.saveToFile(Const.CLIENTS_FILE, clients);
-					}
-					catch (IOException ex) {
-						JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
-					}
+			if ((theater.getSelectedCol() < theater.getNbCol())
+					&& (theater.getSelectedRow() < theater.getNbRow())) {		
+				if(isBooking)
+				{
+					//On reserve la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
+					if(theater.makeReservation(theater.getSelectedCol(), theater.getSelectedRow()))
+						//Si la résérvation dans la salle est faite, on ajoute la place à la liste des résérvations du client
+						selectedClient.addSeat(theater.getSeat(theater.getSelectedCol(), theater.getSelectedRow()));
 				}
+				else
+				{
+					//Si le client a déja reservé cette place, on lui enlève
+					if(selectedClient.removeSeat(theater.getSeat(theater.getSelectedCol(), theater.getSelectedRow())))
+						//On annule la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
+						theater.cancelReservation(theater.getSelectedCol(), theater.getSelectedRow());
+					else
+						JOptionPane.showMessageDialog(null, "This seat is not yours !", "Error", JOptionPane.ERROR_MESSAGE);
+				}
+
+				Serializer.saveToFile(Const.CLIENTS_FILE, clients);
 			}
-			catch (NumberFormatException e1) {
-				JOptionPane.showMessageDialog(null, e1, "Error", JOptionPane.ERROR_MESSAGE);
-			}
-			catch (InvalidActionException e2) {
-				JOptionPane.showMessageDialog(null, e2, "Error", JOptionPane.ERROR_MESSAGE);
-			}
-			theater.updateUI(); // Refresh User Interface
+			
+			theater.updateUI();
 		}
-		else {//Si client selectionner = null
-			JOptionPane.showMessageDialog(null, "No Client !", "Error", JOptionPane.ERROR_MESSAGE);
-		}
+		else
+			JOptionPane.showMessageDialog(null, "Invalid Client !", "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	public void refreshCombo() {
 		// REFRESH
 		comboClients.removeAllItems(); // Remove previous items
-		for (Client c : clients) {
+		
+		for (Client c : clients)
 			comboClients.addItem(c); // Add each car to the combobox
-		}
+			
 		comboClients.setActionCommand("combo");
 		comboClients.addActionListener(this); // Notify when a selection has been made
 		comboClients.updateUI(); // Refresh the combonent graphics

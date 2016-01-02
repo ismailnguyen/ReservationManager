@@ -1,9 +1,7 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class ReservationManagerConsole {
@@ -151,23 +149,26 @@ public class ReservationManagerConsole {
 			showTheater();
 
 			//On demande a l'user qu'il choisisse une ligne (lettre)
-			System.out.println("Please enter a row letter :");
+			System.out.println("Please enter a line letter :");
 
 			//On recupere la ligne && on le met en majuscule
 			row = (scan.next()).toUpperCase();
 
 			//On demande a l'user de choisir une  colonne (chiffre)
-			System.out.println("Please enter line number : ");
+			System.out.println("Please enter column number : ");
 
 			//On la recupere
 			col = scan.next();
 		
 			if(isBooking)
 			{
+				int coli = Integer.parseInt(col);
+				int rowi = row.charAt(0) - 65;
+				
 				//On reserve la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
-				if(theater.makeReservation(row.charAt(0) - 65, Integer.parseInt(col)))
+				if(theater.makeReservation(rowi, coli))
 					//Si la résérvation dans la salle est faite, on ajoute la place à la liste des résérvations du client
-					selectedClient.addSeat(theater.getSeat(row.charAt(0) - 65, Integer.parseInt(col)));
+					selectedClient.addSeat(theater.getSeat(rowi, coli));
 			}
 			else
 			{
@@ -239,18 +240,18 @@ public class ReservationManagerConsole {
 		{
 			case 1 :
 				clients.add(new Client(lastname,
-						firstname,
-						address));
+										firstname,
+										address));
 				break;
 			case 2 :
 				clients.add(new ClientVIP(lastname,
-						firstname,
-						address));
+											firstname,
+											address));
 				break;
 			case 3 :
 				clients.add(new ClientGroup(lastname,
-						firstname,
-						address));
+												firstname,
+												address));
 				break;
 		}
 				
@@ -295,22 +296,15 @@ public class ReservationManagerConsole {
 		if(selectedClient != null)
 		{
 			clients.remove((Client) selectedClient);
-		
+
+			//On retire les sieges que ce client avait
+			for (Seat s : selectedClient.getSeats()) {
+				theater.cancelReservation(s.getCol(), s.getRow());
+			}
+			
 			System.out.println(selectedClient.toString() + " was removed with success.");
 			
 			Serializer.saveToFile(Const.CLIENTS_FILE, clients);
-		}
-	}
-	
-	public static void main(String[] args) throws IOException, NumberFormatException, InvalidActionException, ClassNotFoundException {
-		try {
-			//new ReservationManagerConsole();
-			new ReservationManagerGUI();
-		} 
-		catch (NumberFormatException 
-				//| InvalidActionException 
-				| FileNotFoundException e) {
-			System.err.println(e.getMessage());
 		}
 	}
 }
