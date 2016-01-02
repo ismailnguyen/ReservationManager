@@ -8,12 +8,9 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Scanner;
-
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -23,8 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 public class ReservationManagerGUI extends WindowAdapter implements MouseListener, ActionListener {
-	
-	private Scanner scan = new Scanner(System.in);
+
 	private Theater theater;
 	private LinkedList<Client> clients;
 	
@@ -121,18 +117,12 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 	}
 
 	public void mouseClicked(MouseEvent ev) {
-		int col = 0;
-		int row = 0;
-		
 		Point p = ev.getPoint();//Pour recuperer l'endroit ou on a clique sur la fenetre
-		col = p.x / theater.getRectSize();//On convertit l'endroit ou on a cliquer en colonne 
-		row = p.y / theater.getRectSize();//On fait la meme mais en ligne
 		
 		//On met informe la classe theater des lignes et colonnes selectionnee
-		theater.setSelectedCol(col);
-		theater.setSelectedRow(row);
+		theater.setSelectedCol(p.x / theater.getRectSize());
+		theater.setSelectedRow(p.y / theater.getRectSize());
 		
-		//On rafraichit le theatre
 		theater.updateUI();
 	}
 	
@@ -305,16 +295,16 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 				if(isBooking)
 				{
 					//On reserve la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
-					if(theater.makeReservation(theater.getSelectedCol(), theater.getSelectedRow()))
+					if(theater.makeReservation(theater.getSelectedRow(), theater.getSelectedCol()))
 						//Si la résérvation dans la salle est faite, on ajoute la place à la liste des résérvations du client
-						selectedClient.addSeat(theater.getSeat(theater.getSelectedCol(), theater.getSelectedRow()));
+						selectedClient.addSeat(theater.getSeat(theater.getSelectedRow(), theater.getSelectedCol()));
 				}
 				else
 				{
 					//Si le client a déja reservé cette place, on lui enlève
-					if(selectedClient.removeSeat(theater.getSeat(theater.getSelectedCol(), theater.getSelectedRow())))
+					if(selectedClient.removeSeat(theater.getSeat(theater.getSelectedRow(), theater.getSelectedCol())))
 						//On annule la place en convertissant la chaine en nombre et en la soustrayant pour qu'elle corresponde a nos attentes
-						theater.cancelReservation(theater.getSelectedCol(), theater.getSelectedRow());
+						theater.cancelReservation(theater.getSelectedRow(), theater.getSelectedCol());
 					else
 						JOptionPane.showMessageDialog(null, "This seat is not yours !", "Error", JOptionPane.ERROR_MESSAGE);
 				}

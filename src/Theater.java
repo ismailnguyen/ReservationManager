@@ -260,7 +260,7 @@ public class Theater extends JPanel {
 		g.setColor(new Color(221, 221, 221)); // Set the color to Black
 		g.fillRect(0, 0, getWidth(), getHeight()); // Fill a rectangle where top-left corner is at (0,0) and of the same size than the component
 		
-		for (int i = 0; i < seats.length; i++) {//Double boucle pour creer une image du theatre
+		for (int i = 0; i < seats.length; i++) {
 			for (int j = 0; j < seats[0].length; j++) {
 				//En fonction du type de la place on met une couleur differente
 				switch (seats[i][j].getType()) {
@@ -272,24 +272,21 @@ public class Theater extends JPanel {
 					break;
 					default:
 						//Vert si place libre rouge sinon
-						if (seats[i][j].isBooked() == false) {
-							g.setColor(Color.GREEN);
-						}
-						else {
-							g.setColor(Color.RED);
-						}
+						g.setColor(seats[i][j].isBooked()
+									? Color.RED
+									: Color.GREEN);
 					break;
 				}
 				//On creer des carre pour representer les places
 				g.fillRect(/*150 +*/ (j * rectSize), /*4 + */(i * rectSize), rectSize, rectSize);
 				//On met un siege dans les places et pas dans obstacle ou secene
-				if ((seats[i][j].getType() != SeatType.OBSTACLE) && (seats[i][j].getType() != SeatType.SCENE)) {
-					if (seats[i][j].isBooked() == false) {
+				if ((seats[i][j].getType() != SeatType.OBSTACLE)
+						&& (seats[i][j].getType() != SeatType.SCENE)) {
+					if (!seats[i][j].isBooked())
 						seatImg.paintIcon(this, g, /*150 + */(j * rectSize),/* 4 + */(i * rectSize));
-					}
-					else if (seats[i][j].isBooked() == true) {
+					else
 						reservedImg.paintIcon(this, g,/* 150 + */(j * rectSize), /*4 + */(i * rectSize));
-					}
+
 					g.setColor(Color.BLACK);//Couleur noir pour les lettres
 					/* Loading a new font (14pt, bold) */
 					g.setFont(new Font("default", Font.BOLD, 14));
