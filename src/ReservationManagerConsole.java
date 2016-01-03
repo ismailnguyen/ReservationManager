@@ -108,7 +108,7 @@ public class ReservationManagerConsole {
 		if(selectedClient != null)
 		{
 			System.out.println(selectedClient.toString() + " has reserved seats number :");
-			System.out.println(selectedClient.getExplictedCost());;			
+			System.out.println(selectedClient.getExplictedCost());	
 		}
 	}
 	

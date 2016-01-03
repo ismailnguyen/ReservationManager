@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.LinkedList;
+
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -52,7 +53,7 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 
 		frame.setMinimumSize(/*new Dimension(640, 480)*/theater.getPreferredSize());// Dimension minimum de la fenetre : 640 pixels sur 480 pixels
 		
-		//Affiche une boite fde dialogue lorsqu'on appui sur la croix
+		//Affiche une boite de dialogue lorsqu'on appui sur la croix
 		frame.addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent windowEvent) {
 				int val = JOptionPane.showConfirmDialog(null, "Do you want to quit ?", "Confirm", JOptionPane.YES_NO_OPTION);
@@ -144,8 +145,6 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		Client selectedClient = null;
-
 		try {
 			//si le parametre est :
 			switch (e.getActionCommand()) {
@@ -161,13 +160,7 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 				
 				//Show Reservation
 				case "SR":
-					//Get selected place
-					selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex());
-					if (selectedClient != null)
-						JOptionPane.showMessageDialog(null, selectedClient.getSeats(), "Seats", JOptionPane.INFORMATION_MESSAGE);
-					else
-						JOptionPane.showMessageDialog(null, "Invalid Client", "Error", JOptionPane.ERROR_MESSAGE);
-
+					showReservation();
 					break;
 				
 				//make Reservation
@@ -187,6 +180,15 @@ public class ReservationManagerGUI extends WindowAdapter implements MouseListene
 				| InvalidActionException ex) {
 			JOptionPane.showMessageDialog(null, ex, "Error", JOptionPane.ERROR_MESSAGE);
 		}
+	}
+	
+	private void showReservation() throws InvalidActionException {
+		Client selectedClient = comboClients.getItemAt(comboClients.getSelectedIndex());
+		
+		if(selectedClient != null)	
+			JOptionPane.showMessageDialog(null, selectedClient.getExplictedCost(), "Seats of " + selectedClient.toString(), JOptionPane.INFORMATION_MESSAGE);
+		else
+			JOptionPane.showMessageDialog(null, "Invalid Client", "Error", JOptionPane.ERROR_MESSAGE);
 	}
 
 	public void addClient() throws InvalidActionException, IOException {
